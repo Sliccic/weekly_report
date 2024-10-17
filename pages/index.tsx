@@ -27,8 +27,8 @@ const Home: NextPage = () => {
 
   const prompt =
     form === 'paragraphForm'?
-      `${t('prompt')}${chat}`
-      : `${t('prompt')}${chat}`;
+      `${chat}`
+      : `${chat}`;
 
   const useUserKey = process.env.NEXT_PUBLIC_USE_USER_KEY === "true" ? true : false;
 
@@ -36,7 +36,16 @@ const Home: NextPage = () => {
     e.preventDefault();
     setGeneratedChat("");
     setLoading(true);
-
+    if (useUserKey && api_key == ""){
+      toast.error(t("API_KEY_NULL_ERROR"))
+      setLoading(false)
+      return
+    }
+    if (chat == ""){
+      toast.error(t("CONTENT_NULL_ERROR"))
+      setLoading(false)
+      return
+    }
     const response = useUserKey ?
       await fetch("/api/generate", {
         method: "POST",
@@ -62,7 +71,9 @@ const Home: NextPage = () => {
     console.log("Edge function returned.");
 
     if (!response.ok) {
-      throw new Error(response.statusText);
+      toast.error("服务繁忙，请稍后再试")
+      setLoading(false);
+      return
     }
 
     // This data is a ReadableStream
@@ -94,6 +105,9 @@ const Home: NextPage = () => {
 
       <Header />
       <main className="flex flex-1 w-full flex-col items-center justify-center text-center px-4 mt-12 sm:mt-20">
+        
+
+
       <a
           className="flex max-w-fit items-center justify-center space-x-2 rounded-full border border-gray-300 bg-white px-4 py-2 text-sm text-gray-600 shadow-md transition-colors hover:bg-gray-100 mb-5"
           href="https://github.com/guaguaguaxia/weekly_report"
@@ -103,14 +117,25 @@ const Home: NextPage = () => {
           <Github />
           <p>Star on GitHub</p>
         </a>
+
+
+
         <h1 className="sm:text-6xl text-4xl max-w-2xl font-bold text-slate-900">
-          {t('description1')} <br></br><div               className=" px-4 py-2 sm:mt-3 mt-8 hover:bg-black/80 w-full"></div>{t('description2')}
+          {t('description1')} <br></br><div className=" px-4 py-2 sm:mt-3 mt-8  w-full"></div>{t('description2')}
         </h1>
         <p className="text-slate-500 mt-5">{t('slogan')}</p>
-        <div className="max-w-xl w-full">
-          { useUserKey &&(
-            <>
 
+
+        <div className="max-w-xl w-full">
+        { useUserKey &&(
+            <>
+              <div className="flex mt-10 items-center space-x-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="#000" d="M7 14q-.825 0-1.412-.588Q5 12.825 5 12t.588-1.413Q6.175 10 7 10t1.412.587Q9 11.175 9 12q0 .825-.588 1.412Q7.825 14 7 14Zm0 4q-2.5 0-4.25-1.75T1 12q0-2.5 1.75-4.25T7 6q1.675 0 3.038.825Q11.4 7.65 12.2 9H21l3 3l-4.5 4.5l-2-1.5l-2 1.5l-2.125-1.5H12.2q-.8 1.35-2.162 2.175Q8.675 18 7 18Zm0-2q1.4 0 2.463-.85q1.062-.85 1.412-2.15H14l1.45 1.025L17.5 12.5l1.775 1.375L21.15 12l-1-1h-9.275q-.35-1.3-1.412-2.15Q8.4 8 7 8Q5.35 8 4.175 9.175Q3 10.35 3 12q0 1.65 1.175 2.825Q5.35 16 7 16Z"/></svg>
+                <p className="text-left font-medium">
+                  {t('step0')}{" "}
+
+                </p>
+              </div>
               <input
                   value={api_key}
                   onChange={(e) => setAPIKey(e.target.value)}
@@ -128,7 +153,7 @@ const Home: NextPage = () => {
               width={30}
               height={30}
               alt="1 icon"
-              className="mb-5 sm:mb-0"
+              className="mb-5 xs:mb-0"
             />
             <p className="text-left font-medium">
               {t('step1')}{" "}
@@ -173,6 +198,13 @@ const Home: NextPage = () => {
                 rel="noopener noreferrer"
               >{' '}{t('privacyPolicy2')}</a>
             </span>
+            <br></br>
+            
+
+
+            <br/>
+            <p className="text-slate-500" style={{textAlign: "center"}}>有任何问题请联系我的邮箱: guaguaguaxia@Gmail.com</p>
+
           </div>
         </div>
         <Toaster
@@ -196,7 +228,7 @@ const Home: NextPage = () => {
                       className="bg-white rounded-xl shadow-md p-4 hover:bg-gray-100 transition cursor-copy border"
                       onClick={() => {
                         navigator.clipboard.writeText(generatedChat.trim());
-                        toast("Chat copied to clipboard", {
+                        toast("已复制完整周报内容", {
                           icon: "✂️",
                         });
                       }}
